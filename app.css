@@ -1,0 +1,19 @@
+body {
+    background: black;
+    color: #fff;
+    font: 20px/1.5 sans-serif;
+    text-align: center;
+}
+
+#swf {
+    position: absolute;
+    left: -10px;
+}
+
+.status {
+    min-height: 40px;
+}
+
+.button {
+    font-size: 15px;
+}
