@@ -61,8 +61,7 @@ class Player extends Backbone.Model
        '1', '1',
        '8',
        null, null,
-       allowScriptAccess: 'always',
-       id: @id
+       allowScriptAccess: 'always'
 
   swfReady: =>
     @player = $("##{ @id }")[0]
@@ -75,15 +74,16 @@ class Playlist extends Backbone.Collection
   initialize: (options)->
     @id = options.id
 
-  fetchFeed: =>
-    $.ajax
-      dataType: 'jsonp'
-      url: 'https://gdata.youtube.com/feeds/api/playlists/' +
-           "#{ @id }?v=2&alt=jsonc"
-      success: (feed)=>
-        console.log feed
-        @reset(item.video for item in feed.data.items \
-          when item.video.accessControl.embed == 'allowed')
+  url: ->
+    'https://gdata.youtube.com/feeds/api/playlists/' +
+    "#{ @id }?v=2&alt=jsonc"
+
+  fetch: ->
+    super dataType: 'jsonp'
+
+  parse: (response)->
+    (item.video for item in response.data.items \
+      when item.video.accessControl.embed == 'allowed')
 
   random: ->
     @at Math.floor(Math.random() * @length)
@@ -127,7 +127,7 @@ $ ->
   app.player = new Player id: 'swf'
   app.view = new PlayerView model: app.player
 
-  app.playlist.fetchFeed()
+  app.playlist.fetch()
 
   window.onYouTubePlayerReady = ->
     app.view.render()

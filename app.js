@@ -110,8 +110,7 @@
 
     Player.prototype.swfEmbed = function() {
       return swfobject.embedSWF('http://www.youtube.com/apiplayer?enablejsapi=1&version=3', this.id, '1', '1', '8', null, null, {
-        allowScriptAccess: 'always',
-        id: this.id
+        allowScriptAccess: 'always'
       });
     };
 
@@ -130,7 +129,6 @@
     __extends(Playlist, Backbone.Collection);
 
     function Playlist() {
-      this.fetchFeed = __bind(this.fetchFeed, this);
       Playlist.__super__.constructor.apply(this, arguments);
     }
 
@@ -138,28 +136,27 @@
       return this.id = options.id;
     };
 
-    Playlist.prototype.fetchFeed = function() {
-      var _this = this;
-      return $.ajax({
-        dataType: 'jsonp',
-        url: 'https://gdata.youtube.com/feeds/api/playlists/' + ("" + this.id + "?v=2&alt=jsonc"),
-        success: function(feed) {
-          var item;
-          console.log(feed);
-          return _this.reset((function() {
-            var _i, _len, _ref, _results;
-            _ref = feed.data.items;
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              item = _ref[_i];
-              if (item.video.accessControl.embed === 'allowed') {
-                _results.push(item.video);
-              }
-            }
-            return _results;
-          })());
-        }
+    Playlist.prototype.url = function() {
+      return 'https://gdata.youtube.com/feeds/api/playlists/' + ("" + this.id + "?v=2&alt=jsonc");
+    };
+
+    Playlist.prototype.fetch = function() {
+      return Playlist.__super__.fetch.call(this, {
+        dataType: 'jsonp'
       });
+    };
+
+    Playlist.prototype.parse = function(response) {
+      var item, _i, _len, _ref, _results;
+      _ref = response.data.items;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        item = _ref[_i];
+        if (item.video.accessControl.embed === 'allowed') {
+          _results.push(item.video);
+        }
+      }
+      return _results;
     };
 
     Playlist.prototype.random = function() {
@@ -227,7 +224,7 @@
     app.view = new PlayerView({
       model: app.player
     });
-    app.playlist.fetchFeed();
+    app.playlist.fetch();
     window.onYouTubePlayerReady = function() {
       app.view.render();
       return app.player.swfReady();
